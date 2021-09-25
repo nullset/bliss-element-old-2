@@ -1,0 +1,19 @@
+{
+  "name": "wc",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "vite --port 5033",
+    "build": "vite build --sourcemap=true",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^2.0.5"
+  },
+  "dependencies": {
+    "@nx-js/observer-util": "^4.2.2",
+    "@ungap/custom-elements": "^0.1.15",
+    "construct-style-sheets-polyfill": "^2.4.16",
+    "deepmerge": "^4.2.2",
+    "uhtml": "^2.6.0"
+  }
+}

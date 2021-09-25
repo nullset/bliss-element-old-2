@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+    <script type="module" src="/main.js"></script>
+    <style>
+      *:not(:defined) {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <bliss-tabs>
+      <bliss-tab>One</bliss-tab>
+      <bliss-tab-content>
+        <p>
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+          nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
+          sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
+          rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem
+          ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur
+          sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et
+          dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
+          et justo duo dolores et ea rebum.
+        </p>
+      </bliss-tab-content>
+
+      <bliss-tab active>Two</bliss-tab>
+      <bliss-tab-content>
+        <p>
+          Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum
+          dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing
+          elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore
+          magna aliquyam erat, sed diam voluptua. At vero eos et accusam et
+          justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
+          takimata sanctus est Lorem ipsum dolor sit amet.
+        </p>
+      </bliss-tab-content>
+
+      <bliss-tab disabled>Three</bliss-tab>
+      <bliss-tab-content>
+        <p>More stuff for third tab</p>
+      </bliss-tab-content>
+
+      <bliss-tab>Four</bliss-tab>
+      <bliss-tab-content>
+        <p>This section has sub-tabs!</p>
+
+        <bliss-tabs slot>
+          <bliss-tab>Four.One</bliss-tab>
+          <bliss-tab-content><p>Stuff for 4.1</p></bliss-tab-content>
+          <bliss-tab>Four.Two</bliss-tab>
+          <bliss-tab-content><p>Stuff for 4.2</p></bliss-tab-content>
+          <bliss-tab>Four.Three</bliss-tab>
+          <bliss-tab-content><p>Stuff for 4.3</p></bliss-tab-content>
+        </bliss-tabs>
+      </bliss-tab-content>
+    </bliss-tabs>
+
+    <button is="bliss-alert-button">Click me!</button>
+
+    <button is="fancy-button">FOO BOR</button>
+
+    <!-- <my-component>ouo</my-component> -->
+    <!-- <my-counter></my-counter> -->
+    <div id="projection" style="color: teal"></div>
+  </body>
+</html>
