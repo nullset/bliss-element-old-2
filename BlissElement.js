@@ -165,7 +165,6 @@ function define(tagName, componentObj, options = {}) {
       this.convertPropsToAttributes();
       if (this.constructorCallback) this.constructorCallback();
       this[componentHasLoaded] = false;
-      // this.renderToRoot();
     }
 
     fireEvent(eventName, detail = {}) {
@@ -182,14 +181,12 @@ function define(tagName, componentObj, options = {}) {
     connectedCallback() {
       if (super.connectedCallback) super.connectedCallback();
       globalContext.add(this, true);
-      // this.callLifecyleMethods("onMount");
       this.fireEvent("connectedCallback");
       this.renderToRoot();
     }
 
     disconnectedCallback() {
       if (super.disconnectedCallback) super.disconnectedCallback();
-      // this.callLifecyleMethods("onUnmount");
       globalContext.delete(this);
       this.fireEvent("disconnectedCallback");
     }
@@ -197,7 +194,6 @@ function define(tagName, componentObj, options = {}) {
     adoptedCallback() {
       if (super.adoptedCallback) super.adoptedCallback();
       globalContext.add(this, true);
-      // this.callLifecyleMethods("onAdopted");
       this.fireEvent("adoptedCallback");
     }
 
@@ -227,6 +223,8 @@ function define(tagName, componentObj, options = {}) {
       this[state][propName] = convertedValue;
     }
 
+    // Any event (essentially any property or attribute that starts with "on...")
+    // is pre-bound so that its "this" is the custom element's host node.
     bindEvents() {
       preBoundEvents.forEach((event) => {
         this.addEventListener(event, this);
@@ -248,6 +246,7 @@ function define(tagName, componentObj, options = {}) {
         observe(() => {
           let convertedValue =
             this[state][prop] == null ? null : converter(this[state][prop]);
+
           if (convertedValue == null || convertedValue === false) {
             this.removeAttribute(attributeName);
           } else if (convertedValue === true) {
@@ -308,12 +307,10 @@ function define(tagName, componentObj, options = {}) {
       });
     }
 
-    // callLifecyleMethods(method, args) {
-    //   if (this.constructor.prototype[method]) {
-    //     this.constructor.prototype[method].forEach((fn) => fn.call(this, args));
-    //   }
-    // }
-
+    // Bliss elements are just "bags of state" that happen to render something on the screen.
+    // Any bliss element can access any parent bliss element's publicly available methods, properties, etc.
+    // by calling `elem.getContext(matcher)` where `matcher` is a valid CSS selector (tag name, id, class, etc.).
+    // An element can have access to more than one parent node's contexts at any time.
     getContext(matcher) {
       let node = this;
       let ctx;
