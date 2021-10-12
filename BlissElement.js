@@ -156,13 +156,7 @@ function define(tagName, componentObj, options = {}) {
       if (!/-/.test(this.tagName) && !nativeShadowDOMable[this.tagName])
         this.shadow = false;
 
-      // Set implicit slot name.
-      this.slot =
-        this.getAttribute("is") ||
-        (this.getAttribute("slot") ?? this.tagName.toLowerCase());
-
       this.bindEvents();
-      this.convertPropsToAttributes();
       if (this.constructorCallback) this.constructorCallback();
       this[componentHasLoaded] = false;
     }
@@ -180,6 +174,15 @@ function define(tagName, componentObj, options = {}) {
 
     connectedCallback() {
       if (super.connectedCallback) super.connectedCallback();
+
+      // Set implicit slot name.
+      this.slot =
+        this.getAttribute("is") ||
+        (this.getAttribute("slot") ?? this.tagName.toLowerCase());
+
+      // Convert all props to reflected attributes.
+      this.convertPropsToAttributes();
+
       globalContext.add(this, true);
       this.fireEvent("connectedCallback");
       this.renderToRoot();
