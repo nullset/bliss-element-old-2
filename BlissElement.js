@@ -268,7 +268,7 @@ function define(tagName, componentObj, options = {}) {
     }
 
     renderToRoot() {
-      if (this.shadow === false) return;
+      if (this.shadow === false || !this.render) return;
 
       let rootNode = this.attachShadow({ mode: "open" });
       rootNode.adoptedStyleSheets = componentStylesheets;
