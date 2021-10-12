@@ -91,7 +91,7 @@ function isAnEvent(name) {
 const lifecycleMethods = [
   // "onUnmount",
   // "onAdopted",
-  "constructorCallback",
+  "initCallback",
   "connectedCallback",
   "disconnectedCallback",
   "adoptedCallback",
@@ -152,26 +152,20 @@ function define(tagName, componentObj, options = {}) {
     constructor() {
       super();
 
-      // Do not render to shadow root if we are extending a native element and the element is not shadowDOM-able.
-      if (!/-/.test(this.tagName) && !nativeShadowDOMable[this.tagName])
-        this.shadow = false;
+      // // Do not render to shadow root if we are extending a native element and the element is not shadowDOM-able.
+      // if (!/-/.test(this.tagName) && !nativeShadowDOMable[this.tagName])
+      //   this.shadow = false;
 
-      // Set implicit slot name.
-      this.slot =
-        this.getAttribute("is") ||
-        (this.getAttribute("slot") ?? this.tagName.toLowerCase());
-
-      this.bindEvents();
-      this.convertPropsToAttributes();
-      if (this.constructorCallback) this.constructorCallback();
-      this[componentHasLoaded] = false;
+      // this.bindEvents();
+      // if (this.initCallback) this.initCallback();
+      // this[componentHasLoaded] = false;
     }
 
     fireEvent(eventName, detail = {}) {
       const event = new CustomEvent(
         `${this.tagName.toLowerCase()}:${eventName}`,
         {
-          detail: Object.assign(detail, { element: this }),
+          detail: Object.assign(detail, { host: this }),
         }
       );
       this.dispatchEvent(event);
@@ -180,6 +174,15 @@ function define(tagName, componentObj, options = {}) {
 
     connectedCallback() {
       if (super.connectedCallback) super.connectedCallback();
+
+      // Convert props to attributes. Must happen in `connectedCallback` rather than constructor.
+      this.convertPropsToAttributes();
+
+      // Set implicit slot name.
+      this.slot =
+        this.getAttribute("is") ||
+        (this.getAttribute("slot") ?? this.tagName.toLowerCase());
+
       globalContext.add(this, true);
       this.fireEvent("connectedCallback");
       this.renderToRoot();
@@ -210,6 +213,7 @@ function define(tagName, componentObj, options = {}) {
       } else if (type === Number) {
         convertedValue = Number(newValue);
       } else {
+        debugger;
         if (newValue.test(stringIsObject)) {
           try {
             convertedValue = JSON.parse(newValue);
@@ -311,6 +315,8 @@ function define(tagName, componentObj, options = {}) {
     // Any bliss element can access any parent bliss element's publicly available methods, properties, etc.
     // by calling `elem.getContext(matcher)` where `matcher` is a valid CSS selector (tag name, id, class, etc.).
     // An element can have access to more than one parent node's contexts at any time.
+    // By having access to this context, the child element can react to changes in the parent state, and trigger
+    // changes/events there too.
     getContext(matcher) {
       let node = this;
       let ctx;
@@ -378,3 +384,8 @@ export { define, html, svg, css, observable, observe, raw, state };
 // TODO: Need to ensure that:
 // 1) Mixin methods can be overriden
 // 2) Mixin methods can also be additive
+
+// 3) Handle non-shadow dom elements
+// 4) Test extending native elements
+// 5) Handle data attributes as properties
+// 6) Handle aria attributes as properties

@@ -10,6 +10,16 @@
       *:not(:defined) {
         display: none;
       }
+
+      [is="bliss-alert-button"],
+      [is="bliss-alert-link"] {
+        background: pink;
+        padding: 0.5rem;
+        border: none;
+        display: inline-block;
+        box-sizing: border-box;
+        font-size: 1rem;
+      }
     </style>
   </head>
   <body>
@@ -62,10 +72,21 @@
 
     <button is="bliss-alert-button">Click me!</button>
 
-    <button is="fancy-button">FOO BOR</button>
+    <a is="bliss-alert-link" href="/">Click me too!</a>
+
+    <bliss-foo>ATONHOUNET</bliss-foo>
 
     <!-- <my-component>ouo</my-component> -->
     <!-- <my-counter></my-counter> -->
     <div id="projection" style="color: teal"></div>
+
+    <bliss-tabs>
+      <bliss-tab><a href="">One</a></bliss-tab>
+    </bliss-tabs>
+
+    <portal-element>
+      <b>SOME STUFF</b>
+      some other stuff
+    </portal-element>
   </body>
 </html>
