@@ -8,6 +8,7 @@ import "@ungap/custom-elements"; // Safari
 
 // Hidden variables
 const state = Symbol("state");
+window.sym = state;
 const isBlissElement = Symbol("isBlissElement");
 const componentHasLoaded = Symbol("componentHasLoaded");
 
@@ -36,7 +37,7 @@ const nativeShadowDOMable = [
   return acc;
 }, {});
 
-const stringIsObject = new RegExp(/^\s*(\[|\{})/);
+const stringIsObject = new RegExp(/^\s*(\[|\{)/);
 
 function css(string) {
   return string;
@@ -95,6 +96,7 @@ const lifecycleMethods = [
   "connectedCallback",
   "disconnectedCallback",
   "adoptedCallback",
+  "initialRenderCallback",
 ];
 
 const globalContext = new Set();
@@ -152,6 +154,11 @@ function define(tagName, componentObj, options = {}) {
     constructor() {
       super();
 
+      // // Convert attr prop values to correct typecast values.
+      // Object.values(attributePropMap).forEach((propName) => {
+      //   this.setStateValue(propName, this[propName]);
+      // });
+
       // Do not render to shadow root if we are extending a native element and the element is not shadowDOM-able.
       if (!/-/.test(this.tagName) && !nativeShadowDOMable[this.tagName])
         this.shadow = false;
@@ -159,6 +166,12 @@ function define(tagName, componentObj, options = {}) {
       this.bindEvents();
       if (this.constructorCallback) this.constructorCallback();
       this[componentHasLoaded] = false;
+    }
+
+    setStateValue(name, value) {
+      const { type = String } = flattenedPrototype.attrs[name];
+      let convertedValue = this.typecastValue(type, value);
+      this[state][name] = convertedValue;
     }
 
     fireEvent(eventName, detail = {}) {
@@ -200,29 +213,29 @@ function define(tagName, componentObj, options = {}) {
       this.fireEvent("adoptedCallback");
     }
 
+    typecastValue(type, value) {
+      if (type === Boolean) {
+        return [null, undefined, false, "false"].includes(value) ? false : true;
+      } else if (type === Number) {
+        return new Number(value);
+      } else {
+        try {
+          value = JSON.parse(value);
+        } catch (error) {
+          value = new String(value);
+        }
+        return value;
+      }
+    }
+
     // Update state when attributes change.
     attributeChangedCallback(name, oldValue, newValue) {
       if (super.attributeChangedCallback) super.attributeChangedCallback();
 
       const propName = attributePropMap[name];
+      this.setStateValue(propName, newValue);
       const { type = String } = flattenedPrototype.attrs[propName];
-      let convertedValue;
-
-      if (type === Boolean) {
-        convertedValue = [null, "false"].includes(newValue) ? false : true;
-      } else if (type === Number) {
-        convertedValue = Number(newValue);
-      } else {
-        if (newValue.test(stringIsObject)) {
-          try {
-            convertedValue = JSON.parse(newValue);
-          } catch (e) {
-            console.error(e);
-          }
-        } else {
-          convertedValue = String(newValue);
-        }
-      }
+      let convertedValue = this.typecastValue(type, newValue);
       this[state][propName] = convertedValue;
     }
 
@@ -238,17 +251,24 @@ function define(tagName, componentObj, options = {}) {
     // Based on `state` so values are reactive.
     convertPropsToAttributes() {
       Object.entries(flattenedPrototype.attrs).forEach(([prop, value]) => {
-        if (value.reflect === false) return;
-
         const converter = value.type || String;
         if (converter === Function) return;
+
+        // Set initial prop values base on default value of attr.
+        if (typeof this[prop] === "undefined") {
+          this[prop] = this.typecastValue(converter, value.default);
+        }
+
+        if (value.reflect === false) return;
 
         const attributeName = value.attribute || pascalCaseToSnakeCase(prop);
 
         // Observe update state keys, and set attributes appropriately.
         observe(() => {
           let convertedValue =
-            this[state][prop] == null ? null : converter(this[state][prop]);
+            this[state][prop] == null
+              ? null
+              : this.typecastValue(converter, this[state][prop]); //converter(this[state][prop]);
 
           if (convertedValue == null || convertedValue === false) {
             this.removeAttribute(attributeName);
@@ -305,6 +325,7 @@ function define(tagName, componentObj, options = {}) {
             if (this.componentDidLoad) this.componentDidLoad();
             this[componentHasLoaded] = true;
             this.fireEvent("componentDidLoad");
+            if (this.initialRenderCallback) this.initialRenderCallback();
           });
         }
       });
