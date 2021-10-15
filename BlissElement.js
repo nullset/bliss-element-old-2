@@ -217,14 +217,25 @@ function define(tagName, componentObj, options = {}) {
       if (type === Boolean) {
         return [null, undefined, false, "false"].includes(value) ? false : true;
       } else if (type === Number) {
-        return new Number(value);
+        return Number(value);
       } else {
+        let val;
         try {
-          value = JSON.parse(value);
-        } catch (error) {
-          value = new String(value);
+          val = JSON.parse(value);
+        } catch (e) {
+          val = String(value);
         }
-        return value;
+        return val;
+        // if (value && stringIsObject.test(value)) {
+        //   try {
+        //     return JSON.parse(value);
+        //   } catch (e) {
+        //     console.error(e);
+        //     return {};
+        //   }
+        // } else {
+        //   return String(value);
+        // }
       }
     }
 
