@@ -9,7 +9,7 @@ Making a web component is easy:
 ```
 // --- In javascript
 
-import { html, css, define, observe } from "./BlissElement";
+import { html, define, observe } from "./BlissElement";
 
 const Hello = {
   attrs: { name: { type: String, default: "Danielle" } },
