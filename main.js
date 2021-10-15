@@ -188,6 +188,9 @@ const PortalElement = {
 
     observe(() => {
       if (this[state].active) {
+        // Observe can be called many times, so check to see if an exit already exists. If it does, then return early.
+        if (this.exit) return;
+
         this.createExit();
 
         // Need a RAF to ensure that the shadowRoot is mounted.
@@ -205,15 +208,16 @@ const PortalElement = {
           this.exit.tether = this.tether;
         });
       } else {
-        // if (this.placeholder) this.placeholder.style = undefined;
-        // if (this.exit) {
-        //   this.exit.tether = false;
-        //   this.fireEvent("inactive");
-        //   this.exit.tether = false;
-        //   this.revokeProxiedProperties();
-        //   this.moveFromExitToPortal();
-        //   this.destroyExit();
-        // }
+        // debugger;
+        if (this.placeholder) this.placeholder.style = undefined;
+        if (this.exit) {
+          this.exit.tether = false;
+          this.fireEvent("inactive");
+          this.exit.tether = false;
+          this.revokeProxiedProperties();
+          this.moveFromExitToPortal();
+          this.destroyExit();
+        }
       }
     });
   },
@@ -456,8 +460,6 @@ const PortalExit = {
   // that the exit was mistakenly removed and should be added back to the DOM in its
   // original position relative to other elements still on the page.
   disconnectedCallback() {
-    super.disconnectedCallback();
-
     // NOTE: To see if the portal element is connected to the page *would have been* a
     // great use case for the in-built property `isConnected`. Unfortunately, at the point
     // when the exit is disconnected we don't know if this would return the portal's
