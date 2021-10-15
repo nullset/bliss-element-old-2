@@ -37,12 +37,6 @@ const nativeShadowDOMable = [
   return acc;
 }, {});
 
-const stringIsObject = new RegExp(/^\s*(\[|\{)/);
-
-function css(string) {
-  return string;
-}
-
 function pascalCaseToSnakeCase(str) {
   if (str === "tabIndex") return "tabindex";
   return str
@@ -50,7 +44,7 @@ function pascalCaseToSnakeCase(str) {
     .replace(/^-/, "");
 }
 
-const defaultStyles = css`
+const defaultStyles = `
   :host {
     box-sizing: border-box;
   }
@@ -60,6 +54,9 @@ const defaultStyles = css`
   :host *:before,
   :host *:after {
     box-sizing: inherit;
+  }
+  :host([disabled]) {
+    cursor: not-allowed;
   }
 `;
 

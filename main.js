@@ -1,7 +1,7 @@
-import { html, css, define, observe, raw, state } from "./BlissElement";
+import { html, define, observe, raw, state } from "./BlissElement";
 
 const Tabs = {
-  styles: css`
+  styles: `
     :host nav {
       display: inline-flex;
     }
@@ -99,7 +99,7 @@ const keyboardNavigable = {
 };
 
 const Tab = {
-  styles: css`
+  styles: `
     :host {
       border-bottom: 2px solid transparent;
       cursor: pointer;
@@ -109,7 +109,6 @@ const Tab = {
     }
     :host([disabled]) {
       opacity: 0.5;
-      cursor: not-allowed;
     }
     :host(:not(:nth-of-type(1))) {
       margin-left: 1rem;
@@ -132,7 +131,6 @@ const TabContent = {
   connectedCallback() {
     observe(() => {
       const activeIsNotHost = this.tabs[state].activeTab !== this[state].index;
-      this[state].disabled = activeIsNotHost;
       this[state].hidden = activeIsNotHost;
     });
   },

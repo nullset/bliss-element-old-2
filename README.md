@@ -13,7 +13,7 @@ import { html, css, define, observe } from "./BlissElement";
 
 const Hello = {
   attrs: { name: { type: String, default: "Danielle" } },
-  styles: css`
+  styles: `
     :host {
       color: red;
     }
