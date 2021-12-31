@@ -298,7 +298,7 @@ function define(tagName, componentObj, options = {}) {
     renderToRoot() {
       if (this.shadow === false || !this.render) return;
 
-      let rootNode = this.attachShadow({ mode: "open" });
+      let rootNode = this.shadowRoot || this.attachShadow({ mode: "open" });
       rootNode.adoptedStyleSheets = componentStylesheets;
 
       observe(async () => {
@@ -344,16 +344,20 @@ function define(tagName, componentObj, options = {}) {
     // by calling `elem.getContext(matcher)` where `matcher` is a valid CSS selector (tag name, id, class, etc.).
     // An element can have access to more than one parent node's contexts at any time.
     getContext(matcher) {
-      let node = this;
-      let ctx;
-      while (!ctx && node.parentElement) {
-        node = node.parentElement;
-        if (node[isBlissElement] && node.matches(matcher)) ctx = node;
+      if (typeof matcher === "string") {
+        let node = this;
+        let ctx;
+        while (!ctx && node.parentElement) {
+          node = node.parentElement;
+          if (node[isBlissElement] && node.matches(matcher)) ctx = node;
+        }
+        if (node && document.documentElement !== node) return node;
+        throw new Error(
+          `A context that matches "${matcher}" could not be found for <${this.tagName.toLowerCase()}>.`
+        );
+      } else if (matcher.nodeType) {
+        return matcher;
       }
-      if (node && document.documentElement !== node) return node;
-      throw new Error(
-        `A context that matches "${matcher}" could not be found for <${this.tagName.toLowerCase()}>.`
-      );
     }
   }
 

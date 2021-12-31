@@ -1,4 +1,5 @@
 import { html, define, observe, raw, state } from "./BlissElement";
+window.state = state;
 
 const Tabs = {
   styles: `
@@ -153,6 +154,7 @@ define("bliss-alert-button", AlertButton, {
 // ------------------
 
 // Build a map of all native DOM methods that are defined on the generic Node/HTMLElement objects.
+import normalizeWheel from "normalize-wheel";
 const baseElement = Object.create(HTMLElement.prototype, {});
 const elementProperties = [];
 let prop;
@@ -172,6 +174,16 @@ const PortalElement = {
     active: { type: Boolean, default: false, reflect: false },
     slot: { type: String, default: "", reflect: false }, // Make slot not auto-populate with value.
   },
+  styles: `
+    :host {
+      display: inline-block;
+      vertical-align: baseline;
+    }
+    :host #placeholder:not([hidden]) {
+      display: inline-block;
+      vertical-align: text-bottom;
+    }
+  `,
 
   constructorCallback() {
     console.log("OTHER");
@@ -192,19 +204,27 @@ const PortalElement = {
         this.createExit();
 
         // Need a RAF to ensure that the shadowRoot is mounted.
-        requestAnimationFrame(() => {
-          const { width, height, top, left } = this.getBoundingClientRect();
-          const styles = getComputedStyle(this);
-          this.exit.styles = {
-            display: styles.display,
-            top: `${top}px`,
-            left: `${left}px`,
-          };
-          this.placeholder.style.cssText += `; width: ${width}px; height: ${height}px;`;
-          this.moveFromPortalToExit();
-          this.proxyProperties();
-          this.exit.tether = this.tether;
-        });
+        // requestAnimationFrame(() => {
+        const { width, height, top, left } = this.getBoundingClientRect();
+        const styles = getComputedStyle(this);
+        this.exit.styles = {
+          display: styles.display,
+          top: `${top}px`,
+          left: `${left}px`,
+        };
+        this.placeholder.style.cssText += `; width: ${width}px; height: ${height}px;`; // display: ${styles.display};`;
+        // this.style.cssText += `; width: ${width}px; height: ${height}px; display: ${styles.display};`;
+        this.moveFromPortalToExit();
+        this.proxyProperties();
+        this.exit.tether = this.tether;
+        // const styles = getComputedStyle(this);
+        // debugger;
+        // this[state].styles = {
+        //   display: styles.display,
+        //   top: `${top}px`,
+        //   left: `${left}px`,
+        // };
+        // });
       } else {
         // debugger;
         if (this.placeholder) this.placeholder.style = undefined;
@@ -301,7 +321,7 @@ const PortalElement = {
 
   render() {
     return html`
-      <div id="placeholder"></div>
+      <div id="placeholder" ?hidden="${!this.active}"></div>
       <slot></slot>
     `;
   },
@@ -318,6 +338,14 @@ const PortalExit = {
     left: { type: Number },
     slot: { type: String, default: "", reflect: false }, // Make slot not auto-populate with value.
   },
+  styles: `
+    #overlay {
+      all: inherit;
+      position: fixed !important;
+      // inset: 0;
+      background: cyan;
+    }
+  `,
 
   constructorCallback() {
     this.eventOptions = {
@@ -353,6 +381,19 @@ const PortalExit = {
     // new ResizeObserver((entries) => {
     //   debugger;
     // }).observe(this);
+
+    observe(() => {
+      // debugger;
+      if (this.portal) {
+        if (!this.portal[state].styles) {
+          debugger;
+          return;
+        }
+        Object.entries(this.portal[state].styles).forEach(([key, value]) => {
+          this.style[key] = value;
+        });
+      }
+    });
 
     observe(() => {
       if (this.tether) {
@@ -406,6 +447,19 @@ const PortalExit = {
       this.portal.placeholder.style.width = `${width}px`;
       this.portal.placeholder.style.height = `${height}px`;
     }).observe(this.overlay);
+  },
+
+  componentDidLoad() {
+    // Give overlay the styles from the original portal-element.
+    const overlay = this.shadowRoot.getElementById("overlay");
+    observe(() => {
+      if (this.styles === "undefined") return;
+
+      Object.entries(this.styles).forEach(([key, value]) => {
+        console.log(key, value);
+        overlay.style[key] = value;
+      });
+    });
   },
 
   mousedownHandler(e) {
@@ -478,7 +532,7 @@ const PortalExit = {
 
   render() {
     return html`
-      <div id="overlay" style=${this.style.cssText}>
+      <div id="overlay">
         <slot></slot>
       </div>
     `;

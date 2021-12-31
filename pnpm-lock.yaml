@@ -5,6 +5,7 @@ specifiers:
   '@ungap/custom-elements': ^0.1.15
   construct-style-sheets-polyfill: ^2.4.16
   deepmerge: ^4.2.2
+  normalize-wheel: ^1.0.1
   uhtml: ^2.6.0
   vite: ^2.0.5
 
@@ -13,6 +14,7 @@ dependencies:
   '@ungap/custom-elements': 0.1.15
   construct-style-sheets-polyfill: 2.4.16
   deepmerge: 4.2.2
+  normalize-wheel: 1.0.1
   uhtml: 2.6.0
 
 devDependencies:
@@ -85,6 +87,10 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
     dev: true
+
+  /normalize-wheel/1.0.1:
+    resolution: {integrity: sha1-rsiGr/2wRQcNhWRH32Ls+GFG7EU=}
+    dev: false
 
   /path-parse/1.0.6:
     resolution: {integrity: sha512-GSmOT2EbHrINBf9SR7CDELwlJ8AENk3Qn7OikK4nFYAu3Ote2+JYNVvkpAEQm3/TLNEJFD/xZJjzyxg3KBWOzw==}

@@ -10,6 +10,10 @@
       *:not(:defined) {
         display: none;
       }
+
+      .root portal-element * {
+        background: greenyellow;
+      }
     </style>
   </head>
   <body>
@@ -60,13 +64,20 @@
       </bliss-tab-content>
     </bliss-tabs>
 
-    <button is="bliss-alert-button">Click me!</button>
+    <button is="bliss-alert-button" style="font-size: 9px">Click me!</button>
 
     <button is="fancy-button">FOO BOR</button>
 
-    <portal-element style="border: 1px solid red">
-      <b>Portal</b> element
+    <!-- <div class="root"> -->
+    <portal-element>
+      <span
+        style="border: 1px solid red"
+        onclick="event.target.parentElement.active = !event.target.parentElement.active"
+      >
+        <b>Portal</b> element
+      </span>
     </portal-element>
+    <!-- </div> -->
 
     <!-- <my-component>ouo</my-component> -->
     <!-- <my-counter></my-counter> -->
