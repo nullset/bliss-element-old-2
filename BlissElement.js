@@ -7,8 +7,6 @@ import "construct-style-sheets-polyfill"; // Non-Chromium
 import "@ungap/custom-elements"; // Safari
 
 // Hidden variables
-const state = Symbol("state");
-window.sym = state;
 const isBlissElement = Symbol("isBlissElement");
 const componentHasLoaded = Symbol("componentHasLoaded");
 
@@ -137,7 +135,7 @@ function define(tagName, componentObj, options = {}) {
 
   const componentStylesheets = constructStylesheets(prototypeChain);
   class BlissElement extends base {
-    [state] = observable({});
+    $ = observable({});
     [isBlissElement] = true;
 
     static get observedAttributes() {
@@ -168,7 +166,7 @@ function define(tagName, componentObj, options = {}) {
     setStateValue(name, value) {
       const { type = String } = flattenedPrototype.attrs[name];
       let convertedValue = this.typecastValue(type, value);
-      this[state][name] = convertedValue;
+      this.$[name] = convertedValue;
     }
 
     fireEvent(eventName, detail = {}) {
@@ -244,7 +242,7 @@ function define(tagName, componentObj, options = {}) {
       this.setStateValue(propName, newValue);
       const { type = String } = flattenedPrototype.attrs[propName];
       let convertedValue = this.typecastValue(type, newValue);
-      this[state][propName] = convertedValue;
+      this.$[propName] = convertedValue;
     }
 
     // Any event (essentially any property or attribute that starts with "on...")
@@ -256,7 +254,7 @@ function define(tagName, componentObj, options = {}) {
     }
 
     // Convert properties to strings and set on attributes.
-    // Based on `state` so values are reactive.
+    // Based on `$` (state) so values are reactive.
     convertPropsToAttributes() {
       Object.entries(flattenedPrototype.attrs).forEach(([prop, value]) => {
         const converter = value.type || String;
@@ -274,16 +272,16 @@ function define(tagName, componentObj, options = {}) {
         // Observe update state keys, and set attributes appropriately.
         observe(() => {
           let convertedValue =
-            this[state][prop] == null
+            this.$[prop] == null
               ? null
-              : this.typecastValue(converter, this[state][prop]); //converter(this[state][prop]);
+              : this.typecastValue(converter, this.$[prop]); //converter(this.$[prop]);
 
           if (convertedValue == null || convertedValue === false) {
             this.removeAttribute(attributeName);
           } else if (convertedValue === true) {
             this.setAttribute(attributeName, "");
           } else if (converter === Array) {
-            convertedValue = Array.from(this[state][prop]);
+            convertedValue = Array.from(this.$[prop]);
             this.setAttribute(attributeName, JSON.stringify(convertedValue));
           } else {
             this.setAttribute(attributeName, convertedValue);
@@ -291,7 +289,7 @@ function define(tagName, componentObj, options = {}) {
         });
 
         // Set inintial default values.
-        this[state][prop] = flattenedPrototype.attrs[prop].default;
+        this.$[prop] = flattenedPrototype.attrs[prop].default;
       });
     }
 
@@ -389,15 +387,15 @@ function define(tagName, componentObj, options = {}) {
     });
   });
 
-  // Create getter/setter for any observed attribute, and make `state[prop] === this[prop]`.
+  // Create getter/setter for any observed attribute, and make `$[prop] === this[prop]`.
   Object.keys(flattenedPrototype.attrs).forEach((key) => {
     if (flattenedPrototype.attrs[key] != null) {
       Object.defineProperty(BlissElement.prototype, key, {
         get() {
-          return this[state][key];
+          return this.$[key];
         },
         set(value) {
-          this[state][key] = value;
+          this.$[key] = value;
           return value;
         },
         enumerable: true,
@@ -409,7 +407,7 @@ function define(tagName, componentObj, options = {}) {
   customElements.define(tagName, BlissElement, { extends: extend });
 }
 
-export { define, html, svg, observable, observe, raw, state };
+export { define, html, svg, observable, observe, raw };
 
 // TODO: Need to ensure that:
 // 1) Mixin methods can be overriden

@@ -1,5 +1,4 @@
-import { html, define, observe, raw, state } from "./BlissElement";
-window.state = state;
+import { html, define, observe, raw } from "./BlissElement";
 
 const Tabs = {
   styles: `
@@ -35,7 +34,7 @@ const Tabs = {
   // },
   connectedCallback() {
     observe(() => {
-      this[state].activeTab = this[state].activeTab ?? 0;
+      this.$.activeTab = this.$.activeTab ?? 0;
     });
   },
   render() {
@@ -61,22 +60,22 @@ function tabbable(rootNode = "bliss-tabs") {
       const nodes = Array.from(
         this.tabs.querySelectorAll(`:scope > ${this.tagName}`)
       );
-      this[state].index = nodes.findIndex((node) => node === this);
+      this.$.index = nodes.findIndex((node) => node === this);
 
-      // If this.active is true, then set tabs[state]activeTab to be this tab.
+      // If this.active is true, then set tabs.$activeTab to be this tab.
       observe(() => {
-        if (this[state].active) this.tabs[state].activeTab = this[state].index;
+        if (this.$.active) this.tabs.$.activeTab = this.$.index;
       });
 
-      // If tabs[state].activeTab is this tab, then set this tab's active prop to true.
+      // If tabs.$.activeTab is this tab, then set this tab's active prop to true.
       observe(() => {
-        this[state].active = this.tabs[state].activeTab === this[state].index;
+        this.$.active = this.tabs.$.activeTab === this.$.index;
       });
     },
 
     disconnectedCallback() {
-      if (this.tabs[state].activeTab === this[state].index)
-        this.tabs[state].activeTab = undefined;
+      if (this.tabs.$.activeTab === this.$.index)
+        this.tabs.$.activeTab = undefined;
     },
   };
 }
@@ -87,7 +86,7 @@ const keyboardNavigable = {
     this.addEventListener("keypress", (e) => {
       if (
         e.target === this &&
-        !this[state].disabled &&
+        !this.$.disabled &&
         ["Enter", " "].includes(e.key)
       ) {
         this.click(e);
@@ -119,8 +118,8 @@ const Tab = {
     return html`<slot></slot>`;
   },
   onclick(e) {
-    if (!this[state].disabled) {
-      this.tabs[state].activeTab = this[state].index;
+    if (!this.$.disabled) {
+      this.tabs.$.activeTab = this.$.index;
     }
   },
 };
@@ -131,8 +130,8 @@ define("bliss-tab", Tab, {
 const TabContent = {
   connectedCallback() {
     observe(() => {
-      const activeIsNotHost = this.tabs[state].activeTab !== this[state].index;
-      this[state].hidden = activeIsNotHost;
+      const activeIsNotHost = this.tabs.$.activeTab !== this.$.index;
+      this.$.hidden = activeIsNotHost;
     });
   },
   render() {
@@ -197,7 +196,7 @@ const PortalElement = {
     this.connected = true;
 
     observe(() => {
-      if (this[state].active) {
+      if (this.$.active) {
         // Observe can be called many times, so check to see if an exit already exists. If it does, then return early.
         if (this.exit) return;
 
@@ -219,7 +218,7 @@ const PortalElement = {
         this.exit.tether = this.tether;
         // const styles = getComputedStyle(this);
         // debugger;
-        // this[state].styles = {
+        // this.$.styles = {
         //   display: styles.display,
         //   top: `${top}px`,
         //   left: `${left}px`,
@@ -385,11 +384,11 @@ const PortalExit = {
     observe(() => {
       // debugger;
       if (this.portal) {
-        if (!this.portal[state].styles) {
+        if (!this.portal.$.styles) {
           debugger;
           return;
         }
-        Object.entries(this.portal[state].styles).forEach(([key, value]) => {
+        Object.entries(this.portal.$.styles).forEach(([key, value]) => {
           this.style[key] = value;
         });
       }
