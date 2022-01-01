@@ -103,7 +103,7 @@ function define(tagName, componentObj, options = {}) {
   // Add a default mixin that creates observable attributes for `hidden` and `disabled`.
   let prototypeChain = [
     {
-      attrs: {
+      props: {
         hidden: { type: Boolean, default: false },
         disabled: { type: Boolean, default: false },
       },
@@ -126,7 +126,7 @@ function define(tagName, componentObj, options = {}) {
   const observedAttrs = [];
   const attributePropMap = {};
 
-  Object.entries(flattenedPrototype.attrs).forEach((item) => {
+  Object.entries(flattenedPrototype.props).forEach((item) => {
     const [propName, { attribute }] = item;
     const attributeName = attribute || pascalCaseToSnakeCase(propName);
     observedAttrs.push(attributeName);
@@ -164,7 +164,7 @@ function define(tagName, componentObj, options = {}) {
     }
 
     setStateValue(name, value) {
-      const { type = String } = flattenedPrototype.attrs[name];
+      const { type = String } = flattenedPrototype.props[name];
       let convertedValue = this.typecastValue(type, value);
       this.$[name] = convertedValue;
     }
@@ -240,7 +240,7 @@ function define(tagName, componentObj, options = {}) {
 
       const propName = attributePropMap[name];
       this.setStateValue(propName, newValue);
-      const { type = String } = flattenedPrototype.attrs[propName];
+      const { type = String } = flattenedPrototype.props[propName];
       let convertedValue = this.typecastValue(type, newValue);
       this.$[propName] = convertedValue;
     }
@@ -256,7 +256,7 @@ function define(tagName, componentObj, options = {}) {
     // Convert properties to strings and set on attributes.
     // Based on `$` (state) so values are reactive.
     convertPropsToAttributes() {
-      Object.entries(flattenedPrototype.attrs).forEach(([prop, value]) => {
+      Object.entries(flattenedPrototype.props).forEach(([prop, value]) => {
         const converter = value.type || String;
         if (converter === Function) return;
 
@@ -289,7 +289,7 @@ function define(tagName, componentObj, options = {}) {
         });
 
         // Set inintial default values.
-        this.$[prop] = flattenedPrototype.attrs[prop].default;
+        this.$[prop] = flattenedPrototype.props[prop].default;
       });
     }
 
@@ -388,8 +388,8 @@ function define(tagName, componentObj, options = {}) {
   });
 
   // Create getter/setter for any observed attribute, and make `$[prop] === this[prop]`.
-  Object.keys(flattenedPrototype.attrs).forEach((key) => {
-    if (flattenedPrototype.attrs[key] != null) {
+  Object.keys(flattenedPrototype.props).forEach((key) => {
+    if (flattenedPrototype.props[key] != null) {
       Object.defineProperty(BlissElement.prototype, key, {
         get() {
           return this.$[key];

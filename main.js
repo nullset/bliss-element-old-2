@@ -1,4 +1,4 @@
-import { html, define, observe, raw } from "./BlissElement";
+import { html, define, observe, observable, raw } from "./BlissElement";
 
 const Tabs = {
   styles: `
@@ -6,7 +6,7 @@ const Tabs = {
       display: inline-flex;
     }
   `,
-  attrs: {
+  props: {
     activeTab: { type: Number },
   },
   // constructorCallback() {
@@ -50,38 +50,49 @@ const Tabs = {
 };
 define("bliss-tabs", Tabs);
 
+const tabsContext = Symbol("tabsContext");
+const tabIndex = Symbol("tabIndex");
+const $$ = Symbol("$$");
+const tabs = Symbol("tabs");
+
+const isTabbable = Symbol("isTabbable");
 function tabbable(rootNode = "bliss-tabs") {
   return {
-    attrs: {
+    props: {
       active: { type: Boolean },
     },
     connectedCallback() {
-      this.tabs = this.getContext(rootNode);
-      const nodes = Array.from(
-        this.tabs.querySelectorAll(`:scope > ${this.tagName}`)
+      this[isTabbable] = {};
+      this[isTabbable].tabs = this.getContext(rootNode);
+
+      // this[$$].tabs = this.getContext(rootNode);
+      const nodeList = this[isTabbable].tabs.querySelectorAll(
+        `:scope > ${this.tagName}`
       );
+      const nodes = Array.from(nodeList);
+
       this.$.index = nodes.findIndex((node) => node === this);
 
       // If this.active is true, then set tabs.$activeTab to be this tab.
       observe(() => {
-        if (this.$.active) this.tabs.$.activeTab = this.$.index;
+        if (this.$.active) this[isTabbable].tabs.$.activeTab = this.$.index;
       });
 
       // If tabs.$.activeTab is this tab, then set this tab's active prop to true.
       observe(() => {
-        this.$.active = this.tabs.$.activeTab === this.$.index;
+        this.$.active = this[isTabbable].tabs.$.activeTab === this.$.index;
       });
     },
 
     disconnectedCallback() {
-      if (this.tabs.$.activeTab === this.$.index)
-        this.tabs.$.activeTab = undefined;
+      if (this[isTabbable].tabs.$.activeTab === this.$.index)
+        this[isTabbable].tabs.$.activeTab = undefined;
     },
   };
 }
 
 const keyboardNavigable = {
-  attrs: { tabindex: { type: Number, default: 0 } },
+  props: { tabindex: { type: Number, default: 0 } },
   connectedCallback() {
     this.addEventListener("keypress", (e) => {
       if (
@@ -119,7 +130,7 @@ const Tab = {
   },
   onclick(e) {
     if (!this.$.disabled) {
-      this.tabs.$.activeTab = this.$.index;
+      this[isTabbable].tabs.$.activeTab = this.$.index;
     }
   },
 };
@@ -130,7 +141,8 @@ define("bliss-tab", Tab, {
 const TabContent = {
   connectedCallback() {
     observe(() => {
-      const activeIsNotHost = this.tabs.$.activeTab !== this.$.index;
+      const activeIsNotHost =
+        this[isTabbable].tabs.$.activeTab !== this.$.index;
       this.$.hidden = activeIsNotHost;
     });
   },
@@ -169,7 +181,7 @@ function copyAttributes({ source, target }) {
 }
 
 const PortalElement = {
-  attrs: {
+  props: {
     active: { type: Boolean, default: false, reflect: false },
     slot: { type: String, default: "", reflect: false }, // Make slot not auto-populate with value.
   },
@@ -328,7 +340,7 @@ const PortalElement = {
 define("portal-element", PortalElement);
 
 const PortalExit = {
-  attrs: {
+  props: {
     portal: { reflect: false },
     overlay: { reflect: false },
     styles: { reflect: false },
