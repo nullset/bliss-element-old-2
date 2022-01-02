@@ -94,8 +94,8 @@ const lifecycleMethods = [
   "initialRenderCallback",
 ];
 
-const globalContext = new Set();
-window.globalContext = globalContext;
+// const globalContext = new Set();
+// window.globalContext = globalContext;
 
 function define(tagName, componentObj, options = {}) {
   const { mixins = [], base = HTMLElement, extend = undefined } = options;
@@ -191,20 +191,20 @@ function define(tagName, componentObj, options = {}) {
       // Convert all props to reflected attributes.
       this.convertPropsToAttributes();
 
-      globalContext.add(this, true);
+      // globalContext.add(this, true);
       this.fireEvent("connectedCallback");
       this.renderToRoot();
     }
 
     disconnectedCallback() {
       if (super.disconnectedCallback) super.disconnectedCallback();
-      globalContext.delete(this);
+      // globalContext.delete(this);
       this.fireEvent("disconnectedCallback");
     }
 
     adoptedCallback() {
       if (super.adoptedCallback) super.adoptedCallback();
-      globalContext.add(this, true);
+      // globalContext.add(this, true);
       this.fireEvent("adoptedCallback");
     }
 

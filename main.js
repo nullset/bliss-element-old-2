@@ -50,43 +50,36 @@ const Tabs = {
 };
 define("bliss-tabs", Tabs);
 
-const tabsContext = Symbol("tabsContext");
-const tabIndex = Symbol("tabIndex");
-const $$ = Symbol("$$");
 const tabs = Symbol("tabs");
+const tabbable$ = Symbol("tabbable$");
 
-const isTabbable = Symbol("isTabbable");
 function tabbable(rootNode = "bliss-tabs") {
   return {
     props: {
       active: { type: Boolean },
     },
     connectedCallback() {
-      this[isTabbable] = {};
-      this[isTabbable].tabs = this.getContext(rootNode);
-
-      // this[$$].tabs = this.getContext(rootNode);
-      const nodeList = this[isTabbable].tabs.querySelectorAll(
-        `:scope > ${this.tagName}`
-      );
+      this[tabs] = this.getContext(rootNode);
+      this[tabbable$] = observable({}); // Tabbable mixin internal state.
+      const nodeList = this[tabs].querySelectorAll(`:scope > ${this.tagName}`);
       const nodes = Array.from(nodeList);
 
-      this.$.index = nodes.findIndex((node) => node === this);
+      this[tabbable$].index = nodes.findIndex((node) => node === this);
 
       // If this.active is true, then set tabs.$activeTab to be this tab.
       observe(() => {
-        if (this.$.active) this[isTabbable].tabs.$.activeTab = this.$.index;
+        if (this.$.active) this[tabs].$.activeTab = this[tabbable$].index;
       });
 
       // If tabs.$.activeTab is this tab, then set this tab's active prop to true.
       observe(() => {
-        this.$.active = this[isTabbable].tabs.$.activeTab === this.$.index;
+        this.$.active = this[tabs].$.activeTab === this[tabbable$].index;
       });
     },
 
     disconnectedCallback() {
-      if (this[isTabbable].tabs.$.activeTab === this.$.index)
-        this[isTabbable].tabs.$.activeTab = undefined;
+      if (this[tabs].$.activeTab === this[tabbable$].index)
+        this[tabs].$.activeTab = undefined;
     },
   };
 }
@@ -130,7 +123,7 @@ const Tab = {
   },
   onclick(e) {
     if (!this.$.disabled) {
-      this[isTabbable].tabs.$.activeTab = this.$.index;
+      this[tabs].$.activeTab = this[tabbable$].index;
     }
   },
 };
@@ -141,8 +134,7 @@ define("bliss-tab", Tab, {
 const TabContent = {
   connectedCallback() {
     observe(() => {
-      const activeIsNotHost =
-        this[isTabbable].tabs.$.activeTab !== this.$.index;
+      const activeIsNotHost = this[tabs].$.activeTab !== this[tabbable$].index;
       this.$.hidden = activeIsNotHost;
     });
   },
