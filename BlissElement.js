@@ -186,7 +186,8 @@ function define(tagName, componentObj, options = {}) {
       // Set implicit slot name.
       this.slot =
         this.getAttribute("is") ||
-        (this.getAttribute("slot") ?? this.tagName.toLowerCase());
+        (this.getAttribute("slot") ??
+          this.tagName.toLowerCase().replace(/^bliss-/, ""));
 
       // Convert all props to reflected attributes.
       this.convertPropsToAttributes();

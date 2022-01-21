@@ -40,10 +40,10 @@ const Tabs = {
   render() {
     return html`
       <nav part="tabs">
-        <slot name="bliss-tab"></slot>
+        <slot name="tab"></slot>
       </nav>
       <div part="content">
-        <slot name="bliss-tab-content"></slot>
+        <slot name="tab-content"></slot>
       </div>
     `;
   },
@@ -542,3 +542,54 @@ const PortalExit = {
   },
 };
 define("portal-exit", PortalExit);
+
+const Foo = {
+  render() {
+    return html`
+      <div>
+        <slot name="wrapper">
+          <bliss-bar slot=""></bliss-bar>
+        </slot>
+      </div>
+    `;
+  },
+};
+define("bliss-foo", Foo);
+
+const Bar = {
+  render() {
+    return html` <slot></slot> `;
+  },
+};
+define("bliss-bar", Bar);
+
+const Menu = {
+  shadow: true,
+  render() {
+    return html`
+      <slot name="menu-control">
+        <bliss-menu-control></bliss-menu-control>
+      </slot>
+      <slot name="menu-contents"></slot>
+    `;
+  },
+};
+define("bliss-menu", Menu);
+
+const MenuControl = {
+  render() {
+    return html` <button><slot>...</slot></button> `;
+  },
+};
+define("bliss-menu-control", MenuControl);
+
+const MenuContents = {
+  render() {
+    return html`
+      <div id="contents" style="border: 1px solid red">
+        <slot>My contents</slot>
+      </div>
+    `;
+  },
+};
+define("bliss-menu-contents", MenuContents);
